@@ -1,0 +1,45 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            echo "Syncing edge proxy config..."
+            if [ ! -d /opt/edge/.git ]; then
+              echo "First-time setup: turning /opt/edge into a checkout of this repo..."
+              mkdir -p /opt/edge
+              cd /opt/edge
+              git init -b main
+              git remote add origin https://github.com/tuanhm0803/tuanhm_edge_proxy.git
+              git fetch origin main
+              # -f checks out tracked files from origin/main, overwriting local
+              # copies. It does NOT touch untracked paths, so certbot/www and
+              # certbot/conf (certificate data, gitignored) are left alone.
+              git checkout -f -B main origin/main
+            else
+              cd /opt/edge
+              git pull origin main
+            fi
+
+            mkdir -p certbot/www certbot/conf
+
+            echo "Ensuring edge proxy is up to date and running..."
+            docker compose up -d --remove-orphans
+
+            echo "Edge proxy status:"
+            docker compose ps
