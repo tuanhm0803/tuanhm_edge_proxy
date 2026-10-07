@@ -25,7 +25,7 @@ jobs:
               mkdir -p /opt/edge
               cd /opt/edge
               git init -b main
-              git remote add origin https://github.com/tuanhm0803/tuanhm_edge_proxy.git
+              git remote add origin git@github-edge:tuanhm0803/tuanhm_edge_proxy.git
               git fetch origin main
               # -f checks out tracked files from origin/main, overwriting local
               # copies. It does NOT touch untracked paths, so certbot/www and
@@ -33,7 +33,14 @@ jobs:
               git checkout -f -B main origin/main
             else
               cd /opt/edge
-              git pull origin main
+              # Authenticate with this repo's read-only deploy key. The
+              # github-edge host alias is defined in ~/.ssh/config on the VPS
+              # (see DEPLOY_KEYS_GUIDE.md in the aifakenews repo).
+              git remote set-url origin git@github-edge:tuanhm0803/tuanhm_edge_proxy.git
+              git fetch origin main
+              # Match main exactly so hand edits on the VPS can't block the
+              # update. Untracked certbot data is left alone.
+              git reset --hard FETCH_HEAD
             fi
 
             mkdir -p certbot/www certbot/conf
