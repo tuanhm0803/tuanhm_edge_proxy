@@ -29,6 +29,15 @@ while :; do
 
     certbot renew --webroot -w /var/www/certbot --quiet
 
+    # Certbot makes live/ and archive/ root-only and keys 0600. nginx loads
+    # certs per-handshake in its worker processes, which run as the nginx
+    # user (uid/gid 101 in nginx:alpine), so give that group read access.
+    if [ -d /etc/letsencrypt/archive ]; then
+        chmod 0755 /etc/letsencrypt/live /etc/letsencrypt/archive
+        chgrp -R 101 /etc/letsencrypt/archive
+        chmod 0640 /etc/letsencrypt/archive/*/privkey*.pem
+    fi
+
     if [ "$missing" -eq 1 ]; then
         sleep 20m & wait $!
     else

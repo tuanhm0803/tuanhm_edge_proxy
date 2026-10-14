@@ -57,10 +57,10 @@ jobs:
 
             echo "Ensuring edge proxy is up to date and running..."
             docker compose up -d --remove-orphans
-            # nginx.conf is a single-file bind mount and git replaces the file
-            # on checkout, so the running container would keep the old copy.
-            # Restart to load the new one.
-            docker compose restart nginx
+            # nginx.conf and certbot-loop.sh are single-file bind mounts and git
+            # replaces files on checkout, so running containers would keep the
+            # old copies. Restart to load the new ones.
+            docker compose restart nginx certbot
 
             echo "Edge proxy status:"
             docker compose ps
