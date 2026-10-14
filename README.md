@@ -3,8 +3,14 @@
 Shared nginx reverse proxy sitting in front of every app on the
 `72.60.43.33` VPS that needs ports 80/443. Only one process can bind those
 ports, so this is the single entry point for the box; everything else
-(aifakenews, autopretty, future apps) reaches the internet through it
-instead of binding host ports directly.
+(aifakenews, autopretty, tuanhm.pro, future apps) reaches the internet
+through it instead of binding host ports directly.
+
+| Domain | Routed to | TLS terminated by |
+|---|---|---|
+| `aifakenews.cloud`, `www.` | `aifakenews-frontend-prod:443` | the app itself |
+| `autopretty.tuanhm.pro` | `127.0.0.1:8443` → `autopretty-frontend:80` | this proxy |
+| `tuanhm.pro` (`www.` redirects) | `127.0.0.1:8444` → `tuanhm-frontend:80` | this proxy |
 
 ## How it works
 
