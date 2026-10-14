@@ -36,24 +36,21 @@ values as the `aifakenews` repo's secrets of the same names.
 ## Adding a new domain
 
 1. Point DNS for the new (sub)domain at `72.60.43.33`.
-2. Get a certificate (webroot method, needs this proxy already running so
-   port 80 is served):
-   ```
-   docker run --rm \
-     -v /opt/edge/certbot/www:/var/www/certbot \
-     -v /opt/edge/certbot/conf:/etc/letsencrypt \
-     certbot/certbot certonly --webroot -w /var/www/certbot \
-     -d your.new.domain --email you@example.com --agree-tos --non-interactive
-   ```
-3. In `nginx.conf`, add a `server { listen 127.0.0.1:PORT ssl; ... }` block
+2. In `nginx.conf`, add a `server { listen 127.0.0.1:PORT ssl; ... }` block
    for the new domain (pick an unused loopback port) pointing at its
    container, and add a line to the `stream{}` block's `map` routing its
-   SNI name to `127.0.0.1:PORT`.
+   SNI name to `127.0.0.1:PORT`. Use `$ssl_server_name` in the
+   `ssl_certificate`/`ssl_certificate_key` paths (copy the autopretty
+   block) so nginx starts fine before the certificate exists.
+3. Add the domain to `CERT_DOMAINS` in `docker-compose.yml`.
 4. Make sure the new app's own container joins the external `edge-network`
    (`networks: - edge-network`, `networks: edge-network: { external: true,
    name: edge-network }`) and does **not** publish its own 80/443 to the
    host.
-5. Commit and push — the workflow reloads nginx with the new config.
+5. Commit and push. The workflow restarts the stack; `edge-certbot` issues
+   the certificate on startup (retrying every 20 minutes if validation
+   fails) and renews it automatically. Check progress with
+   `docker logs edge-certbot` on the VPS.
 
 ## Why `aifakenews.cloud` is special-cased
 

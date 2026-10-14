@@ -17,11 +17,19 @@ services:
     image: certbot/certbot
     container_name: edge-certbot
     restart: unless-stopped
+    depends_on:
+      - nginx
+    environment:
+      CERTBOT_EMAIL: hiitsling@gmail.com
+      # Space-separated. Domains whose TLS this proxy terminates; each needs
+      # a matching server block + map line in nginx.conf. Not aifakenews -
+      # it manages its own cert.
+      CERT_DOMAINS: autopretty.tuanhm.pro
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
-    entrypoint: >
-      /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;"
+      - ./scripts/certbot-loop.sh:/certbot-loop.sh:ro
+    entrypoint: ["/bin/sh", "/certbot-loop.sh"]
     networks:
       - edge-network
 

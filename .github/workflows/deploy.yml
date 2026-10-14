@@ -45,8 +45,22 @@ jobs:
 
             mkdir -p certbot/www certbot/conf
 
+            echo "Validating nginx config..."
+            # Test the new config in a throwaway container first; with set -e
+            # a bad config aborts here and the running proxy is left alone.
+            # (Upstreams are all variables, resolved per request, so no
+            # network access is needed for the test.)
+            docker run --rm \
+              -v /opt/edge/nginx.conf:/etc/nginx/nginx.conf:ro \
+              -v /opt/edge/certbot/conf:/etc/letsencrypt:ro \
+              nginx:1.27-alpine nginx -t
+
             echo "Ensuring edge proxy is up to date and running..."
             docker compose up -d --remove-orphans
+            # nginx.conf is a single-file bind mount and git replaces the file
+            # on checkout, so the running container would keep the old copy.
+            # Restart to load the new one.
+            docker compose restart nginx
 
             echo "Edge proxy status:"
             docker compose ps
