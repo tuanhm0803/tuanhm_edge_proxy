@@ -24,7 +24,7 @@ services:
       # Space-separated. Domains whose TLS this proxy terminates; each needs
       # a matching server block + map line in nginx.conf. Not aifakenews -
       # it manages its own cert.
-      CERT_DOMAINS: autopretty.tuanhm.pro tuanhm.pro www.tuanhm.pro
+      CERT_DOMAINS: autopretty.tuanhm.pro tuanhm.pro www.tuanhm.pro dq.tuanhm.pro
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt

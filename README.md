@@ -11,6 +11,7 @@ through it instead of binding host ports directly.
 | `aifakenews.cloud`, `www.` | `aifakenews-frontend-prod:443` | the app itself |
 | `autopretty.tuanhm.pro` | `127.0.0.1:8443` → `autopretty-frontend:80` | this proxy |
 | `tuanhm.pro` (`www.` redirects) | `127.0.0.1:8444` → `tuanhm-frontend:80` | this proxy |
+| `dq.tuanhm.pro` | `127.0.0.1:8445` → `dq-app:8080` | this proxy |
 
 ## How it works
 
